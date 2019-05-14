@@ -101,8 +101,8 @@ public class car : MonoBehaviour {
 		{
 			pcvr.playerTruckSObj.setTopspeed(topSpeedNow);
 		}
-        InputEventCtrl.GetInstance().ClickTVYaoKongLeftBtEvent += ClickTVYaoKongLeftBtEvent;
-        InputEventCtrl.GetInstance().ClickTVYaoKongRightBtEvent += ClickTVYaoKongRightBtEvent;
+        //InputEventCtrl.GetInstance().ClickTVYaoKongLeftBtEvent += ClickTVYaoKongLeftBtEvent;
+        //InputEventCtrl.GetInstance().ClickTVYaoKongRightBtEvent += ClickTVYaoKongRightBtEvent;
         InputEventCtrl.GetInstance().ClickTVYaoKongUpBtEvent += ClickTVYaoKongUpBtEvent;
         InputEventCtrl.GetInstance().ClickTVYaoKongDownBtEvent += ClickTVYaoKongDownBtEvent;
     }
@@ -189,7 +189,19 @@ public class car : MonoBehaviour {
     }
 
     float m_TVSteerVal = 0f;
-    float m_TVSteerRealVal = 0f;
+    float _TVSteerRealVal = 0f;
+    float m_TVSteerRealVal
+    {
+        set { _TVSteerRealVal = value; }
+        get
+        {
+            if (InputEventCtrl.GetInstance() != null)
+            {
+                return InputEventCtrl.GetInstance().m_PlayerRealDir;
+            }
+            return _TVSteerRealVal;
+        }
+    }
     ButtonState m_LeftTVBtState = ButtonState.UP;
     ButtonState m_RightTVBtState = ButtonState.UP;
     private void ClickTVYaoKongLeftBtEvent(ButtonState val)

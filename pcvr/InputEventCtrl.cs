@@ -406,10 +406,29 @@ public class InputEventCtrl : MonoBehaviour {
 		//}
 	}
 
+    /// <summary>
+    /// 玩家真实方向.
+    /// </summary>
+    internal float m_PlayerRealDir = 0f;
     ButtonState DirBtLeft = ButtonState.UP;
     ButtonState DirBtRight = ButtonState.UP;
     public void OnReceiveDirectionAngleMsgFTServer(float angle)
     {
+        if (angle == 0f)
+        {
+            m_PlayerRealDir = 0f;
+        }
+        else
+        {
+            float maxAngle = 200f;
+            if (Mathf.Abs(angle) > maxAngle)
+            {
+                angle = Mathf.Sign(angle) * maxAngle;
+            }
+            m_PlayerRealDir = Mathf.Sign(angle) * (Mathf.Abs(angle) / maxAngle);
+        }
+        //SSDebug.Log("OnReceiveDirectionAngleMsgFTServer -> m_PlayerRealDir == " + m_PlayerRealDir);
+
         ButtonState dirBtLeftVal = ButtonState.UP;
         ButtonState dirBtRightVal = ButtonState.UP;
         if (angle < 0f)
