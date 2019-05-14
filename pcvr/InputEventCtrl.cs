@@ -192,7 +192,8 @@ public class InputEventCtrl : MonoBehaviour {
 
 	void Update()
 	{
-		if (pcvr.bIsHardWare)
+        UpdatePlayerDirectionToZero();
+        if (pcvr.bIsHardWare)
         {
             if (Input.GetKeyUp(KeyCode.Space) && pcvr.bPlayerStartKeyDown)
 			{pcvr.bPlayerStartKeyDown = false;
@@ -412,15 +413,64 @@ public class InputEventCtrl : MonoBehaviour {
     internal float m_PlayerRealDir = 0f;
     ButtonState DirBtLeft = ButtonState.UP;
     ButtonState DirBtRight = ButtonState.UP;
+    public class PlayerDirectionData
+    {
+        internal float maxAngle = 200f;
+        /// <summary>
+        /// 自动归位最大时间.
+        /// </summary>
+        internal float maxTime = 0.35f;
+        internal float speed = 0f;
+        internal float lastTimeDir = 0f;
+        internal bool IsDirectionToZero = false;
+        public PlayerDirectionData()
+        {
+            speed = 1f / maxTime;
+        }
+    }
+    internal PlayerDirectionData m_PlayerDirectionData = new PlayerDirectionData();
+
+    void UpdatePlayerDirectionToZero()
+    {
+        if (m_PlayerDirectionData.IsDirectionToZero == true)
+        {
+            float dTime = Time.time - m_PlayerDirectionData.lastTimeDir;
+            float dirVal = dTime * m_PlayerDirectionData.speed;
+            if (m_PlayerRealDir != 0f)
+            {
+                if (Mathf.Abs(m_PlayerRealDir) >= dirVal)
+                {
+                    if (m_PlayerRealDir > 0f)
+                    {
+                        m_PlayerRealDir -= dirVal;
+                    }
+                    else
+                    {
+                        m_PlayerRealDir += dirVal;
+                    }
+                }
+                else
+                {
+                    m_PlayerRealDir = 0f;
+                    m_PlayerDirectionData.IsDirectionToZero = false;
+                }
+            }
+            //SSDebug.Log("OnReceiveDirectionAngleMsgFTServer -> m_PlayerRealDir == " + m_PlayerRealDir);
+        }
+    }
+
     public void OnReceiveDirectionAngleMsgFTServer(float angle)
     {
         if (angle == 0f)
         {
-            m_PlayerRealDir = 0f;
+            //m_PlayerRealDir = 0f;
+            m_PlayerDirectionData.IsDirectionToZero = true;
         }
         else
         {
-            float maxAngle = 200f;
+            m_PlayerDirectionData.IsDirectionToZero = false;
+            m_PlayerDirectionData.lastTimeDir = Time.time;
+            float maxAngle = m_PlayerDirectionData.maxAngle;
             if (Mathf.Abs(angle) > maxAngle)
             {
                 angle = Mathf.Sign(angle) * maxAngle;
