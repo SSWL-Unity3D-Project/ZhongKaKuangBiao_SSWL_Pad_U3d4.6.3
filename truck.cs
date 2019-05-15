@@ -146,7 +146,7 @@ public class truck : MonoBehaviour {
 	public float speedAdjust = 1;
 	public int mingciSelf = 0;
 	public  int mingciFirstPlayerRecord = 0;
-	private static float adjustTime = 5.0f;
+	private static float adjustTime = 1.0f;
 	private float curAdjustTime = 0;
 	private int AIIndex = -1;
 	private bool AIFinished = false;
