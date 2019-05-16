@@ -31,7 +31,8 @@ public enum truckTriName{
 	tishi,
 	qinangQian,
 	qinangHou,
-	qinangJieshu
+	qinangJieshu,
+    zhongJiang,
 }
 
 public class triTruckInfor : MonoBehaviour {
@@ -42,7 +43,12 @@ public class triTruckInfor : MonoBehaviour {
 	{
 		switch(curTruckTriName)
 		{
-		case truckTriName.laHuiDian:
+        case truckTriName.zhongJiang:
+            {
+                triggerName = "zhongJiangTri";
+                break;
+            }
+        case truckTriName.laHuiDian:
 			triggerName = "laHuiDianTri";
 			break;
 		case truckTriName.jiaoHuiDian:

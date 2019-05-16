@@ -24,7 +24,7 @@ public class truck : MonoBehaviour {
     /// <summary>
     /// 卡车最高速度(km/h).
     /// </summary>
-    float m_TruckTopSpeed = 100f;
+    float m_AiTruckTopSpeed = 100f;
 	private float daojuLastTime = -1;
 	public float daojuTime = 1.0f;
 	public GameObject m_DaojuParticle;		//should net work
@@ -284,8 +284,8 @@ public class truck : MonoBehaviour {
 		SetupCenterOfMass();
 
         //topSpeed = topSpeedTotal;
-        m_TruckTopSpeed = startTopSpeedTotal;
-        changeToSecond (m_TruckTopSpeed);
+        m_AiTruckTopSpeed = startTopSpeedTotal;
+        changeToSecond (m_AiTruckTopSpeed);
 		SetupGears();
 		resetResetInfor ();
 		
@@ -301,8 +301,8 @@ public class truck : MonoBehaviour {
     IEnumerator DelayChangeTruckTopSpeed()
     {
         yield return new WaitForSeconds(8f);
-        m_TruckTopSpeed = topSpeedTotal;
-        changeToSecond(m_TruckTopSpeed);
+        m_AiTruckTopSpeed = topSpeedTotal;
+        changeToSecond(m_AiTruckTopSpeed);
     }
 
 	public void onlyAddWheelCollider()
@@ -474,6 +474,15 @@ public class truck : MonoBehaviour {
 		{
 			isAutoMove = false;
 		}
+
+        if (isAutoMove == true)
+        {
+            //Ai卡车.
+            if (pcvr.aFirstScriObj != null)
+            {
+                pcvr.aFirstScriObj.OnEventPlayerEnterZhongJiangTrigger += OnEventPlayerEnterZhongJiangTrigger;
+            }
+        }
 
 		Start1 ();
 	}
@@ -871,8 +880,8 @@ public class truck : MonoBehaviour {
 		     && !rigidbody.isKinematic 
 		     && ((truckTrans.eulerAngles.x >= 335 && truckTrans.eulerAngles.x <= 360) || truckTrans.eulerAngles.x < 90))
 		{
-			if (nowSpeed < m_TruckTopSpeed * speedAdjust)
-			rigidbody.velocity = Vector3.Lerp (rigidbody.velocity, (truckTrans.forward * (m_TruckTopSpeed * speedAdjust)), changeTime * Time.deltaTime);
+			if (nowSpeed < m_AiTruckTopSpeed * speedAdjust)
+			rigidbody.velocity = Vector3.Lerp (rigidbody.velocity, (truckTrans.forward * (m_AiTruckTopSpeed * speedAdjust)), changeTime * Time.deltaTime);
 
 			if (!isActiveChentu && (!isGongluDuan || !isInGonglu))
 			{
@@ -1945,506 +1954,507 @@ public class truck : MonoBehaviour {
 			return;
 		}
 
-		if (other.transform.GetComponent<triTruckInfor>()
-		    && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("laHuiDianTri") == 0)
-		{//only record the point information as the last valid position
-			if (lahuiObj == other.transform)
-			{
-				return;
-			}
+        if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("laHuiDianTri") == 0)
+        {//only record the point information as the last valid position
+            if (lahuiObj == other.transform)
+            {
+                return;
+            }
 
-			lahuiObj = other.transform;		//this only a point and reset the forwad
-			lahuiPos = truckTrans.position;
-			//other.transform.collider.enabled = false;
-			curMoveDistance = 0;
-			lahuiIndex ++;
-			lahuiNumber ++;
+            lahuiObj = other.transform;     //this only a point and reset the forwad
+            lahuiPos = truckTrans.position;
+            //other.transform.collider.enabled = false;
+            curMoveDistance = 0;
+            lahuiIndex++;
+            lahuiNumber++;
 
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		     && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("jiaoHuiDianTri") == 0)
-		{//if has more than one path
-			if (jiaohuiObj == other.transform)
-			{
-				return;
-			}
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+             && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("jiaoHuiDianTri") == 0)
+        {//if has more than one path
+            if (jiaohuiObj == other.transform)
+            {
+                return;
+            }
 
-			jiaohuiObj = other.transform;
-			jiaohuiIndex ++;
-			lahuiIndex = 0;
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		     && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addSpeedTri") == 0)
-		{//speeding
-			if (isAutoMove)
-			{
-				return;
-			}
-			
-			if (daojuLastTime < 0)
-			{
-				daojuLastTime = Time.time;
-			}
-			else if (Time.time - daojuLastTime <= daojuTime)
-			{
-				return;
-			}
+            jiaohuiObj = other.transform;
+            jiaohuiIndex++;
+            lahuiIndex = 0;
 
-			/*if (pcvr.danqitishiSObj.danqiNum >= pcvr.danqitishiSObj.danqiMaxNum)
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+             && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addSpeedTri") == 0)
+        {//speeding
+            if (isAutoMove)
+            {
+                return;
+            }
+
+            if (daojuLastTime < 0)
+            {
+                daojuLastTime = Time.time;
+            }
+            else if (Time.time - daojuLastTime <= daojuTime)
+            {
+                return;
+            }
+
+            /*if (pcvr.danqitishiSObj.danqiNum >= pcvr.danqitishiSObj.danqiMaxNum)
 			{
 				return;
 			}*/
 
-			other.transform.collider.enabled = false;
+            other.transform.collider.enabled = false;
 
-			//if (pcvr.danqitishiSObj)
-			//	pcvr.danqitishiSObj.getOneDanqi();
-			speedingHere();
-			
-			playAudioHit (11);
-			
-			daojuLastTime = Time.time;
-			if (Network.isClient)
-			{
-				GameObject Tobject = (GameObject)Network.Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation, 0);
+            //if (pcvr.danqitishiSObj)
+            //	pcvr.danqitishiSObj.getOneDanqi();
+            speedingHere();
 
-				destoryNetObj(Tobject);
-				Destroy(other.gameObject);
-			}
-			else
-			{
-				GameObject Tobject = (GameObject)Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation);
-				Destroy(Tobject, 2.0f);
-				
-				Destroy(other.gameObject);
-			}
+            playAudioHit(11);
 
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCSpawnTri") == 0)
-		{//spawn NPC
-			if (isAutoMove)
-			{
-				return;
-			}
+            daojuLastTime = Time.time;
+            if (Network.isClient)
+            {
+                GameObject Tobject = (GameObject)Network.Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation, 0);
 
-			//isClient or not -- linkMode
-			if (!Network.isClient)
-			{//single mode
-				other.transform.collider.enabled = false;
-				other.transform.GetComponent<spawnTriggerScript>().BeginSpawn();
-				//Destroy(other.gameObject);
-			}
-			else
-			{//is client, will send message to server to spawn npc
-				other.transform.collider.enabled = false;
-				//Destroy(other.gameObject);
-				
-				pcvr.selfServerScrObj.spawnReceive(other.name);
-			}
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCDeleteTri") == 0)
-		{//delete NPC
-			if (isAutoMove)
-			{
-				return;
-			}
+                destoryNetObj(Tobject);
+                Destroy(other.gameObject);
+            }
+            else
+            {
+                GameObject Tobject = (GameObject)Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation);
+                Destroy(Tobject, 2.0f);
 
-			//isClient or not -- linkMode
-			if (!Network.isClient)
-			{//single mode
-				other.transform.collider.enabled = false;
-				other.transform.GetComponent<deleteTriggerScript>().BeginDelete();
-				//Destroy(other.gameObject);
-			}
-			else
-			{//is client
-				other.transform.collider.enabled = false;
-				//Destroy(other.gameObject);
-				
-				pcvr.selfServerScrObj.deleteReceive(other.name);
-			}
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		    && (other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTimeTri") == 0
-		    || other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTime2Tri") == 0))
-		{//add time
-			if (isAutoMove || Network.isClient)
-			{
-				return;
-			}
+                Destroy(other.gameObject);
+            }
 
-			if (daojuLastTime < 0)
-			{
-				daojuLastTime = Time.time;
-			}
-			else if (Time.time - daojuLastTime <= daojuTime)
-			{
-				return;
-			}
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCSpawnTri") == 0)
+        {//spawn NPC
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			other.transform.collider.enabled = false;
+            //isClient or not -- linkMode
+            if (!Network.isClient)
+            {//single mode
+                other.transform.collider.enabled = false;
+                other.transform.GetComponent<spawnTriggerScript>().BeginSpawn();
+                //Destroy(other.gameObject);
+            }
+            else
+            {//is client, will send message to server to spawn npc
+                other.transform.collider.enabled = false;
+                //Destroy(other.gameObject);
 
-			if(other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTimeTri") == 0)
-			{
-				pcvr.UITruckScrObj.AddGameTime(1);
-				playAudioHit (10);
-			}
-			else if(other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTime2Tri") == 0)
-			{
-				pcvr.UITruckScrObj.AddGameTime(2);
-				playAudioHit (10);
-			}
+                pcvr.selfServerScrObj.spawnReceive(other.name);
+            }
 
-			daojuLastTime = Time.time;
-			if (Network.isClient)
-			{
-				GameObject Tobject = (GameObject)Network.Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation, 0);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCDeleteTri") == 0)
+        {//delete NPC
+            if (isAutoMove)
+            {
+                return;
+            }
 
-				destoryNetObj(Tobject);
-				Network.Destroy(other.gameObject);
-			}
-			else
-			{
-				GameObject Tobject = (GameObject)Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation);
-				Destroy(Tobject, 2.0f);
-				
-				Destroy(other.gameObject);
-			}
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("openLightTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            //isClient or not -- linkMode
+            if (!Network.isClient)
+            {//single mode
+                other.transform.collider.enabled = false;
+                other.transform.GetComponent<deleteTriggerScript>().BeginDelete();
+                //Destroy(other.gameObject);
+            }
+            else
+            {//is client
+                other.transform.collider.enabled = false;
+                //Destroy(other.gameObject);
 
-			if (other.transform.GetComponent<OpenLight>())
-			{
-				other.transform.GetComponent<OpenLight>().OpenLightAndPar();
-			}
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("DengTri") == 0)
-		{shouldPanduan = true;
-			for(int i = 0; i < other.transform.childCount; i++)
-			{
-				if (other.transform.GetChild(i).GetComponent<Light>())
-				{
-					other.transform.GetChild(i).GetComponent<Light>().enabled = false;
-				}
-			}
+                pcvr.selfServerScrObj.deleteReceive(other.name);
+            }
 
-			pengle = true;
-			pengleTime = pengleTotalTime;
-			
-			ChangeLayersRecursively(other.transform, "IGNORE");
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("tishiTri") == 0
-		         && other.transform.GetComponent<tishiTrigger>())
-		{//tishi
-			if (isAutoMove)
-			{
-				return;
-			}
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && (other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTimeTri") == 0
+            || other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTime2Tri") == 0))
+        {//add time
+            if (isAutoMove || Network.isClient)
+            {
+                return;
+            }
 
-			if (tishiLastTime < 0)
-			{
-				tishiLastTime = Time.time;
-			}
-			else if (Time.time - tishiLastTime <= 0.3f)
-			{
-				return;
-			}
+            if (daojuLastTime < 0)
+            {
+                daojuLastTime = Time.time;
+            }
+            else if (Time.time - daojuLastTime <= daojuTime)
+            {
+                return;
+            }
 
-			tishiLastTime = Time.time;
-			//other.transform.collider.enabled = false;
-			pcvr.UITruckScrObj.showTishiObj(other.transform.GetComponent<tishiTrigger>().getSpriteIndex(), other.transform.GetComponent<tishiTrigger>().getShowTime());
-			//Destroy(other.gameObject);
+            other.transform.collider.enabled = false;
 
-			if (pcvr.sound2DScrObj)
-			{
-				pcvr.sound2DScrObj.playAudioLubiaotishi(true);
-			}
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("qinangQianTri") == 0)
-		{//qinang qian
-			if (isAutoMove)
-			{
-				return;
-			}
+            if (other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTimeTri") == 0)
+            {
+                pcvr.UITruckScrObj.AddGameTime(1);
+                playAudioHit(10);
+            }
+            else if (other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("addTime2Tri") == 0)
+            {
+                pcvr.UITruckScrObj.AddGameTime(2);
+                playAudioHit(10);
+            }
 
-			other.transform.collider.enabled = false;
-			forwardBackStateQN = 2;
-			//Destroy(other.gameObject);
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("qinangHouTri") == 0)
-		{//qinang hou
-			if (isAutoMove)
-			{
-				return;
-			}
-			
-			other.transform.collider.enabled = false;
-			forwardBackStateQN = 1;
-			//Destroy(other.gameObject);
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("qinangJieshuTri") == 0)
-		{//qinang stop
-			if (isAutoMove)
-			{
-				return;
-			}
-			
-			other.transform.collider.enabled = false;
-			forwardBackStateQN = 0;
+            daojuLastTime = Time.time;
+            if (Network.isClient)
+            {
+                GameObject Tobject = (GameObject)Network.Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation, 0);
 
-			if (TGameState == TruckGameState.addSpeed)
-			{
-				CancelInvoke("speedingQNControl");
-				InvokeRepeating("speedingQNControl", 0, 0.08f);
-			}
+                destoryNetObj(Tobject);
+                Network.Destroy(other.gameObject);
+            }
+            else
+            {
+                GameObject Tobject = (GameObject)Instantiate(m_DaojuParticle, other.transform.position + other.transform.forward * m_BaozhaForward + Vector3.up * m_BaozhaUp, other.transform.rotation);
+                Destroy(Tobject, 2.0f);
 
-			//Destroy(other.gameObject);
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("stopFollowTri") == 0)
-		{
-			if (pcvr.XKCarCameraSObj && isPlayerTruck)
-			{
-				isStopFollowC = true;
-				stopFollowCamera();
-				CancelInvoke("followAgain");
-				Invoke ("followAgain", stopFollowTime);
-			}
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterGongluTri") == 0)
-		{
-			if (isPlayerTruck && pcvr.carSObj && !isInGonglu)
-			{
-				pcvr.carSObj.changeTopSpeedGongluTulu (true, 1);
-			}
+                Destroy(other.gameObject);
+            }
 
-			isGongluDuan = true;
-			isInGonglu = true;
-			controlChentu(false, 3);
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveGongluTri") == 0)
-		{
-			if (isPlayerTruck && pcvr.carSObj && isInGonglu)
-			{
-				pcvr.carSObj.changeTopSpeedGongluTulu (false, 2);
-			}
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("openLightTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			isGongluDuan = false;
-			isInGonglu = false;
-			controlChentu(true, 4);
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterWaterTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            if (other.transform.GetComponent<OpenLight>())
+            {
+                other.transform.GetComponent<OpenLight>().OpenLightAndPar();
+            }
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("DengTri") == 0)
+        {
+            shouldPanduan = true;
+            for (int i = 0; i < other.transform.childCount; i++)
+            {
+                if (other.transform.GetChild(i).GetComponent<Light>())
+                {
+                    other.transform.GetChild(i).GetComponent<Light>().enabled = false;
+                }
+            }
 
-			isInwater = true;
+            pengle = true;
+            pengleTime = pengleTotalTime;
 
-			if (pcvr.heatDistortSObj)
-			{
-				pcvr.heatDistortSObj.InitPlayScreenWater();
-			}
+            ChangeLayersRecursively(other.transform, "IGNORE");
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("tishiTri") == 0
+                 && other.transform.GetComponent<tishiTrigger>())
+        {//tishi
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			fangxiangpanDoudongIndex = 1;
-			controlWaterTruck(true, 3);
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveWaterTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            if (tishiLastTime < 0)
+            {
+                tishiLastTime = Time.time;
+            }
+            else if (Time.time - tishiLastTime <= 0.3f)
+            {
+                return;
+            }
 
-			isInwater = false;
-			fangxiangpanDoudongIndex = 3;
-			controlWaterTruck(false, 4);
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterSuishiluTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            tishiLastTime = Time.time;
+            //other.transform.collider.enabled = false;
+            pcvr.UITruckScrObj.showTishiObj(other.transform.GetComponent<tishiTrigger>().getSpriteIndex(), other.transform.GetComponent<tishiTrigger>().getShowTime());
+            //Destroy(other.gameObject);
 
-			isInSuishiLu = true;
-			fangxiangpanDoudongIndex = 2;
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveSuishiluTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            if (pcvr.sound2DScrObj)
+            {
+                pcvr.sound2DScrObj.playAudioLubiaotishi(true);
+            }
 
-			isInSuishiLu = false;
-			fangxiangpanDoudongIndex = 1;
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterShadiLuTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("qinangQianTri") == 0)
+        {//qinang qian
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			isInShadiLu = true;
-			fangxiangpanDoudongIndex = 0;
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		         && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveShadiLuTri") == 0)
-		{
-			if (isAutoMove)
-			{
-				return;
-			}
+            other.transform.collider.enabled = false;
+            forwardBackStateQN = 2;
+            //Destroy(other.gameObject);
 
-			isInShadiLu = false;
-			fangxiangpanDoudongIndex = 1;
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-		          && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("daojuLiTri") == 0)
-		{//daoju
-			if (isAutoMove)
-			{
-				return;
-			}
-			//playAudioHit (3);
-			//other.transform.collider.enabled = false;
-			ChangeLayersRecursively(other.transform, "IGNORE");
-			
-			//forward - small NPC will fly out
-			other.transform.root.GetComponent<daojuPengzhuang>().daojuPengshangle(truckTrans.forward, false, chetouPoint.position);
-			
-			pengle = true;
-			pengleTime = pengleTotalTime;
-			
-			return;
-		}
-		else if ((other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCSmallTri") == 0)
-		    || (other.transform.root.GetComponent<triTruckInfor>()
-		    && other.transform.root.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCSmallTri") == 0))
-		{//small NPC
-			if (Time.time - m_HitTimmer < 0.1f && m_HitTimmer > 0)
-			{
-				return;
-			}
-			//ChangeLayersRecursively(other.transform, "IGNORE");
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("qinangHouTri") == 0)
+        {//qinang hou
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			m_HitTimmer = Time.time;
+            other.transform.collider.enabled = false;
+            forwardBackStateQN = 1;
+            //Destroy(other.gameObject);
 
-			findOtherIndex = other.transform.root.GetComponent<NPCControl>().getHitDirection(truckTrans.position);
-			curDirectionIndex = getHitDirection(other.transform.position);
-			//playAudioHit (3);	//20170714 will change here
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("qinangJieshuTri") == 0)
+        {//qinang stop
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			//forward - small NPC will fly out
-			other.transform.root.GetComponent<NPCControl>().hitByPlayer(truckTrans.forward);
+            other.transform.collider.enabled = false;
+            forwardBackStateQN = 0;
 
-			other.transform.root.GetComponent<NPCControl>().addDaojuPengzhuang(truckTrans.forward, true, chetouPoint.position);
+            if (TGameState == TruckGameState.addSpeed)
+            {
+                CancelInvoke("speedingQNControl");
+                InvokeRepeating("speedingQNControl", 0, 0.08f);
+            }
 
-			//other.transform.root.gameObject.AddComponent<daojuPengzhuang>();
+            //Destroy(other.gameObject);
 
-			//other.transform.root.GetComponent<daojuPengzhuang>().daojuPengshangle(truckTrans.forward, true, chetouPoint.position);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("stopFollowTri") == 0)
+        {
+            if (pcvr.XKCarCameraSObj && isPlayerTruck)
+            {
+                isStopFollowC = true;
+                stopFollowCamera();
+                CancelInvoke("followAgain");
+                Invoke("followAgain", stopFollowTime);
+            }
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterGongluTri") == 0)
+        {
+            if (isPlayerTruck && pcvr.carSObj && !isInGonglu)
+            {
+                pcvr.carSObj.changeTopSpeedGongluTulu(true, 1);
+            }
 
-			if (isPlayerTruck)
-			{
-				return;
-			}
+            isGongluDuan = true;
+            isInGonglu = true;
+            controlChentu(false, 3);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveGongluTri") == 0)
+        {
+            if (isPlayerTruck && pcvr.carSObj && isInGonglu)
+            {
+                pcvr.carSObj.changeTopSpeedGongluTulu(false, 2);
+            }
 
-			pengle = true;
-			pengleTime = pengleTotalTime;
-			
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("serverFollowTriTri") == 0)
-		{//Debug.Log("follo***  ");
-			//follow player - only for link mode
-			if (!Network.isClient)
-			{
-				return;
-			}
-			other.transform.collider.enabled = false;
+            isGongluDuan = false;
+            isInGonglu = false;
+            controlChentu(true, 4);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterWaterTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
 
-			//pcvr.selfServerScrObj.FollowServerH(other.gameObject.name, other.transform.GetComponent<followLinkScript>().getIndex(), pcvr.selfIndex);
-			pcvr.selfServerScrObj.FollowServerH(other.gameObject.name, UnityEngine.Random.Range (0, 5), pcvr.selfIndex);
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("serverPointTriTri") == 0)
-		{//Debug.Log("innnnnnnnnnnnnnnnnnnnnnnn  " + Time.time + " "+ gameObject + " " + other.gameObject.name);
-			//at point - enter - only for link mode
-			//can't hide or delete here, into and leave the trigger as the same trigger box
-			if (!Network.isClient)
-			{
-				return;
-			}
-			other.transform.collider.enabled = false;
+            isInwater = true;
 
-			pcvr.selfServerScrObj.PointServerH(other.gameObject.name, other.transform.GetComponent<pointLinkScript>().getPointName(), other.transform.GetComponent<pointLinkScript>().getIslookat(), pcvr.selfIndex);
-			return;
-		}
-		else if ((other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("PlayerTri") == 0)
-			|| (other.transform.root.GetComponent<triTruckInfor>()
-		    && other.transform.root.GetComponent<triTruckInfor>().getTriggerName().CompareTo("PlayerTri") == 0))
-		{
-			//hit other player
-			if (isPlayerTruck)
-			{
-				playAudioHit (3);
-				//Debug.Log("getHitDirection(truckTrans.position)    " + getHitDirection(other.transform.position) + " "+ nowSpeed);
-				//forward and speed
-				/*if (getHitDirection(other.transform.position) == 1 && nowSpeed > 10.0f)
+            if (pcvr.heatDistortSObj)
+            {
+                pcvr.heatDistortSObj.InitPlayScreenWater();
+            }
+
+            fangxiangpanDoudongIndex = 1;
+            controlWaterTruck(true, 3);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveWaterTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
+
+            isInwater = false;
+            fangxiangpanDoudongIndex = 3;
+            controlWaterTruck(false, 4);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterSuishiluTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
+
+            isInSuishiLu = true;
+            fangxiangpanDoudongIndex = 2;
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveSuishiluTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
+
+            isInSuishiLu = false;
+            fangxiangpanDoudongIndex = 1;
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("enterShadiLuTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
+
+            isInShadiLu = true;
+            fangxiangpanDoudongIndex = 0;
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                 && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("leaveShadiLuTri") == 0)
+        {
+            if (isAutoMove)
+            {
+                return;
+            }
+
+            isInShadiLu = false;
+            fangxiangpanDoudongIndex = 1;
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+                  && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("daojuLiTri") == 0)
+        {//daoju
+            if (isAutoMove)
+            {
+                return;
+            }
+            //playAudioHit (3);
+            //other.transform.collider.enabled = false;
+            ChangeLayersRecursively(other.transform, "IGNORE");
+
+            //forward - small NPC will fly out
+            other.transform.root.GetComponent<daojuPengzhuang>().daojuPengshangle(truckTrans.forward, false, chetouPoint.position);
+
+            pengle = true;
+            pengleTime = pengleTotalTime;
+
+            return;
+        }
+        else if ((other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCSmallTri") == 0)
+            || (other.transform.root.GetComponent<triTruckInfor>()
+            && other.transform.root.GetComponent<triTruckInfor>().getTriggerName().CompareTo("NPCSmallTri") == 0))
+        {//small NPC
+            if (Time.time - m_HitTimmer < 0.1f && m_HitTimmer > 0)
+            {
+                return;
+            }
+            //ChangeLayersRecursively(other.transform, "IGNORE");
+
+            m_HitTimmer = Time.time;
+
+            findOtherIndex = other.transform.root.GetComponent<NPCControl>().getHitDirection(truckTrans.position);
+            curDirectionIndex = getHitDirection(other.transform.position);
+            //playAudioHit (3);	//20170714 will change here
+
+            //forward - small NPC will fly out
+            other.transform.root.GetComponent<NPCControl>().hitByPlayer(truckTrans.forward);
+
+            other.transform.root.GetComponent<NPCControl>().addDaojuPengzhuang(truckTrans.forward, true, chetouPoint.position);
+
+            //other.transform.root.gameObject.AddComponent<daojuPengzhuang>();
+
+            //other.transform.root.GetComponent<daojuPengzhuang>().daojuPengshangle(truckTrans.forward, true, chetouPoint.position);
+
+            if (isPlayerTruck)
+            {
+                return;
+            }
+
+            pengle = true;
+            pengleTime = pengleTotalTime;
+
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("serverFollowTriTri") == 0)
+        {//Debug.Log("follo***  ");
+         //follow player - only for link mode
+            if (!Network.isClient)
+            {
+                return;
+            }
+            other.transform.collider.enabled = false;
+
+            //pcvr.selfServerScrObj.FollowServerH(other.gameObject.name, other.transform.GetComponent<followLinkScript>().getIndex(), pcvr.selfIndex);
+            pcvr.selfServerScrObj.FollowServerH(other.gameObject.name, UnityEngine.Random.Range(0, 5), pcvr.selfIndex);
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("serverPointTriTri") == 0)
+        {//Debug.Log("innnnnnnnnnnnnnnnnnnnnnnn  " + Time.time + " "+ gameObject + " " + other.gameObject.name);
+         //at point - enter - only for link mode
+         //can't hide or delete here, into and leave the trigger as the same trigger box
+            if (!Network.isClient)
+            {
+                return;
+            }
+            other.transform.collider.enabled = false;
+
+            pcvr.selfServerScrObj.PointServerH(other.gameObject.name, other.transform.GetComponent<pointLinkScript>().getPointName(), other.transform.GetComponent<pointLinkScript>().getIslookat(), pcvr.selfIndex);
+            return;
+        }
+        else if ((other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("PlayerTri") == 0)
+            || (other.transform.root.GetComponent<triTruckInfor>()
+            && other.transform.root.GetComponent<triTruckInfor>().getTriggerName().CompareTo("PlayerTri") == 0))
+        {
+            //hit other player
+            if (isPlayerTruck)
+            {
+                playAudioHit(3);
+                //Debug.Log("getHitDirection(truckTrans.position)    " + getHitDirection(other.transform.position) + " "+ nowSpeed);
+                //forward and speed
+                /*if (getHitDirection(other.transform.position) == 1 && nowSpeed > 10.0f)
 				{
 					if (Network.isClient)
 					{
@@ -2455,165 +2465,180 @@ public class truck : MonoBehaviour {
 						other.transform.root.GetComponent<truck>().hitByPlayerPlayer(truckTrans.forward, nowSpeed);
 					}
 				}*/
-			}
-			/*else
+            }
+            /*else
 			{
 				rigidbody.isKinematic = true;
 			}*/
 
-			pengle = true;
-			penglePlayer = true;
-			pengleTime = pengleTotalTime;
-			return;
-		}
-		else if (other.transform.GetComponent<triTruckInfor>()
-			&& other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("zhongdianTri") == 0
-		   	&& lahuiNumber >= 10)
-		{
-			GameEndOrPassCloseYan ();
+            pengle = true;
+            penglePlayer = true;
+            pengleTime = pengleTotalTime;
+            return;
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("zhongJiangTri") == 0
+               && lahuiNumber >= 10)
+        {
+            //玩家进入中奖触发器.
+            //此时需要对Ai速度进行控制.
+            if (Network.peerType == NetworkPeerType.Disconnected)
+            {
+                if (isAutoMove == false)
+                {
+                    PlayerEnterZhongJiangTrigger(other.transform.GetComponent<triTruckInfor>());
+                }
+            }
+        }
+        else if (other.transform.GetComponent<triTruckInfor>()
+            && other.transform.GetComponent<triTruckInfor>().getTriggerName().CompareTo("zhongdianTri") == 0
+               && lahuiNumber >= 10)
+        {
+            GameEndOrPassCloseYan();
 
-			if (Network.isServer)
-			{
-				//only for AI
-				if (isAutoMove)
-				{
-					if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
-					{
-						if (AIIndex >= 0)
-						{//AI
-							jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
-							pcvr.jiaohuiPointArr[AIIndex] = jiaohuiIndex;
-						}
+            if (Network.isServer)
+            {
+                //only for AI
+                if (isAutoMove)
+                {
+                    if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
+                    {
+                        if (AIIndex >= 0)
+                        {//AI
+                            jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
+                            pcvr.jiaohuiPointArr[AIIndex] = jiaohuiIndex;
+                        }
 
-						AIFinished = true;
-						AIEndGameLink(AIIndex, false);
-						pcvr.UITruckScrObj.passLevelHereLink(AIIndex);
-					}
-					else
-					{
-						curPathIndex = -1;
-						isGuoleZhongdian = true;
-						curPaoquanNumber ++;
-					}
-				}
-			}
-			else if (Network.isClient)
-			{
-				if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
-				{
-					if (networkView)
-					{
-						jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
-						networkView.RPC("SendMoveInforRPC", RPCMode.All, pcvr.selfIndex, curMoveDistance, jiaohuiIndex, lahuiIndex);
-					}
+                        AIFinished = true;
+                        AIEndGameLink(AIIndex, false);
+                        pcvr.UITruckScrObj.passLevelHereLink(AIIndex);
+                    }
+                    else
+                    {
+                        curPathIndex = -1;
+                        isGuoleZhongdian = true;
+                        curPaoquanNumber++;
+                    }
+                }
+            }
+            else if (Network.isClient)
+            {
+                if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
+                {
+                    if (networkView)
+                    {
+                        jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
+                        networkView.RPC("SendMoveInforRPC", RPCMode.All, pcvr.selfIndex, curMoveDistance, jiaohuiIndex, lahuiIndex);
+                    }
 
-					//only for player
-					pcvr.uiRunState = 10;	//will send message to server
-					other.gameObject.SetActive(false);
+                    //only for player
+                    pcvr.uiRunState = 10;   //will send message to server
+                    other.gameObject.SetActive(false);
 
-					speedEndHere();
-					AIEndGameLink(pcvr.selfIndex, true);
-					pcvr.UITruckScrObj.passLevelHereLink(pcvr.selfIndex);
-					
-					if (pcvr.sound2DScrObj)
-					{
-						pcvr.sound2DScrObj.playAudioZhongdian();
-					}
+                    speedEndHere();
+                    AIEndGameLink(pcvr.selfIndex, true);
+                    pcvr.UITruckScrObj.passLevelHereLink(pcvr.selfIndex);
 
-					pcvr.GetInstance().initEndGamele();
-				}
-				else
-				{
-					isGuoleZhongdian = true;
-					curPaoquanNumber ++;
-					pcvr.UITruckScrObj.clearAllNPCObj();
-					
-					/*pcvr.UITruckScrObj.showZuihouyiquan();
+                    if (pcvr.sound2DScrObj)
+                    {
+                        pcvr.sound2DScrObj.playAudioZhongdian();
+                    }
+
+                    pcvr.GetInstance().initEndGamele();
+                }
+                else
+                {
+                    isGuoleZhongdian = true;
+                    curPaoquanNumber++;
+                    pcvr.UITruckScrObj.clearAllNPCObj();
+
+                    /*pcvr.UITruckScrObj.showZuihouyiquan();
 					
 					if (pcvr.sound2DScrObj)
 					{
 						pcvr.sound2DScrObj.playAudioZuihouyiquan (true);
 					}*/
 
-					pcvr.aFirstScriObj.resetSomeTriInfor(true);
-				}
-			}
-			else
-			{//single mode
-				if (isAutoMove)
-				{
-					if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
-					{
-						if (AIIndex >= 0)
-						{//AI
-							jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
-							pcvr.jiaohuiPointArr[AIIndex] = jiaohuiIndex;
-						}
+                    pcvr.aFirstScriObj.resetSomeTriInfor(true);
+                }
+            }
+            else
+            {//single mode
+                if (isAutoMove)
+                {
+                    if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
+                    {
+                        if (AIIndex >= 0)
+                        {//AI
+                            jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
+                            pcvr.jiaohuiPointArr[AIIndex] = jiaohuiIndex;
+                        }
 
-						AIFinished = true;
-						AIEndGameZhongdian();
+                        AIFinished = true;
+                        AIEndGameZhongdian();
 
-						pcvr.indexOnlyFinal[pcvr.finishedNumber] = AIIndex;
-						pcvr.finishedNumber ++;
-					}
-					else
-					{
-						curPathIndex = -1;
-						isGuoleZhongdian = true;
-						curPaoquanNumber ++;
-					}
-				}
-				else
-				{
-					if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
-					{
-						jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
-						pcvr.jiaohuiPointArr[pcvr.selfIndex] = jiaohuiIndex;
+                        pcvr.indexOnlyFinal[pcvr.finishedNumber] = AIIndex;
+                        pcvr.finishedNumber++;
+                    }
+                    else
+                    {
+                        curPathIndex = -1;
+                        isGuoleZhongdian = true;
+                        curPaoquanNumber++;
+                    }
+                }
+                else
+                {
+                    if (!pcvr.aFirstScriObj.isPaoLiangquan/* || isGuoleZhongdian*/ || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
+                    {
+                        jiaohuiIndex = (4 - pcvr.finishedNumber) * 100;
+                        pcvr.jiaohuiPointArr[pcvr.selfIndex] = jiaohuiIndex;
 
 
-						pcvr.uiRunState = 10;
-						other.gameObject.SetActive(false);
+                        pcvr.uiRunState = 10;
+                        other.gameObject.SetActive(false);
 
-						speedEndHere();
-						
-						pcvr.indexOnlyFinal[pcvr.finishedNumber] = pcvr.selfIndex;
-						pcvr.finishedNumber ++;
+                        speedEndHere();
 
-						pcvr.UITruckScrObj.passLevelHere();
-						
-						if (pcvr.sound2DScrObj)
-						{
-							pcvr.sound2DScrObj.playAudioZhongdian();
-						}
+                        pcvr.indexOnlyFinal[pcvr.finishedNumber] = pcvr.selfIndex;
+                        pcvr.finishedNumber++;
 
-						pcvr.GetInstance().initEndGamele();
-					}
-					else
-					{
-						isGuoleZhongdian = true;
-						curPaoquanNumber ++;
-						pcvr.UITruckScrObj.clearAllNPCObj();
-						Debug.Log("pppppppppppppppppppppppppppppppppppppppppppppppp   " + curPaoquanNumber + " "+ pcvr.aFirstScriObj.paoJiquan);
-						/*pcvr.UITruckScrObj.showZuihouyiquan();
+                        pcvr.UITruckScrObj.passLevelHere();
+
+                        if (pcvr.sound2DScrObj)
+                        {
+                            pcvr.sound2DScrObj.playAudioZhongdian();
+                        }
+
+                        pcvr.GetInstance().initEndGamele();
+                    }
+                    else
+                    {
+                        isGuoleZhongdian = true;
+                        curPaoquanNumber++;
+                        pcvr.UITruckScrObj.clearAllNPCObj();
+                        Debug.Log("pppppppppppppppppppppppppppppppppppppppppppppppp   " + curPaoquanNumber + " " + pcvr.aFirstScriObj.paoJiquan);
+                        /*pcvr.UITruckScrObj.showZuihouyiquan();
 						
 						if (pcvr.sound2DScrObj)
 						{
 							pcvr.sound2DScrObj.playAudioZuihouyiquan (true);
 						}*/
 
-						pcvr.aFirstScriObj.resetSomeTriInfor(false);
-					}
-				}
-			}
-			lahuiNumber = 0;
-			return;
-		}
-		else
-		{shouldPanduan = true;
-			pengleTime = pengleTotalTime;
-			pengle = true;
-			//playAudioHit (2);
-		}
+                        pcvr.aFirstScriObj.resetSomeTriInfor(false);
+                    }
+                }
+            }
+            lahuiNumber = 0;
+            return;
+        }
+        else
+        {
+            shouldPanduan = true;
+            pengleTime = pengleTotalTime;
+            pengle = true;
+            //playAudioHit (2);
+        }
 
 		if (shouldPanduan)
 		{
@@ -2649,7 +2674,68 @@ public class truck : MonoBehaviour {
 		}
 	}
 
-	void AIEndGameZhongdian()
+    /// <summary>
+    /// 当玩家碰上中奖触发器时.
+    /// </summary>
+    void PlayerEnterZhongJiangTrigger(triTruckInfor trigger)
+    {
+        if (trigger == null)
+        {
+            SSDebug.LogWarning("PlayerEnterZhongJiangTrigger -> trigger was null!");
+            return;
+        }
+
+        ZhongJiangTriggerData triggerData = trigger.GetComponent<ZhongJiangTriggerData>();
+        if (triggerData == null)
+        {
+            SSDebug.LogWarning("PlayerEnterZhongJiangTrigger -> not find ZhongJiangTriggerData!");
+            return;
+        }
+
+        if (!pcvr.aFirstScriObj.isPaoLiangquan || (curPaoquanNumber >= pcvr.aFirstScriObj.paoJiquan - 1))
+        {
+            if (pcvr.aFirstScriObj != null)
+            {
+                if (triggerData.IsEnterTrigger == false)
+                {
+                    SSDebug.Log("OnPlayerEnterZhongJiangTrigger......");
+                    triggerData.IsEnterTrigger = true;
+                    //Ai卡车是否超越玩家.
+                    triggerData.IsAiChaoYuePlayer = UnityEngine.Random.Range(0, 100) % 2 == 0 ? true : false;
+                    pcvr.aFirstScriObj.OnPlayerEnterZhongJiangTrigger(trigger);
+                }
+            }
+        }
+    }
+
+    void OnEventPlayerEnterZhongJiangTrigger(triTruckInfor trigger)
+    {
+        if (isAutoMove == false)
+        {
+            return;
+        }
+
+        if (trigger == null)
+        {
+            SSDebug.LogWarning("OnEventPlayerEnterZhongJiangTrigger -> trigger was null!");
+            return;
+        }
+
+        ZhongJiangTriggerData triggerData = trigger.GetComponent<ZhongJiangTriggerData>();
+        if (triggerData == null)
+        {
+            SSDebug.LogWarning("OnEventPlayerEnterZhongJiangTrigger -> not find ZhongJiangTriggerData!");
+            return;
+        }
+
+        float topSpeed = triggerData.GetAiTruckSpeed();
+        SSDebug.Log("OnEventPlayerEnterZhongJiangTrigger -> change aiTruck speed, topSpeed == " + topSpeed
+            + ", name ============ " + gameObject.name);
+        m_AiTruckTopSpeed = topSpeed;
+        changeToSecond(m_AiTruckTopSpeed);
+    }
+    
+    void AIEndGameZhongdian()
 	{
 		if (isAutoMove && AIIndex >= 0)
 		{//AI

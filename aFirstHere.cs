@@ -660,4 +660,22 @@ public class aFirstHere : MonoBehaviour {
 			gameObject.GetComponent<GrayscaleEffect> ().rampOffset = -1;
 		}
 	}
+
+    #region 玩家进入触发器事件.
+    /// <summary>
+    /// 电视遥控器按键消息.
+    /// </summary>
+    public delegate void EventHandelTrigger(triTruckInfor val);
+    public event EventHandelTrigger OnEventPlayerEnterZhongJiangTrigger;
+    /// <summary>
+    /// 当玩家进入中奖触发器.
+    /// </summary>
+    public void OnPlayerEnterZhongJiangTrigger(triTruckInfor val)
+    {
+        if (OnEventPlayerEnterZhongJiangTrigger != null)
+        {
+            OnEventPlayerEnterZhongJiangTrigger(val);
+        }
+    }
+    #endregion
 }
