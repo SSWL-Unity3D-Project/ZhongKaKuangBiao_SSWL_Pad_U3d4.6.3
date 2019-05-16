@@ -13,7 +13,18 @@ public class truck : MonoBehaviour {
 	private bool isStopFollowC = false;
 	public Transform pathObj;	//the paths parent object
 	public int pathObjIndex;	//the paths parent object
-	public float  topSpeedTotal = 160f;	//will not change during the game, the top speed
+    /// <summary>
+    /// 游戏开始5秒之后卡车的最高速度.
+    /// </summary>
+	public float  topSpeedTotal = 160f; //will not change during the game, the top speed
+    /// <summary>
+    /// 游戏开始后5秒内卡车的最高速度.
+    /// </summary>
+    public float  startTopSpeedTotal = 160f; //will not change during the game, the top speed
+    /// <summary>
+    /// 卡车最高速度(km/h).
+    /// </summary>
+    float m_TruckTopSpeed = 100f;
 	private float daojuLastTime = -1;
 	public float daojuTime = 1.0f;
 	public GameObject m_DaojuParticle;		//should net work
@@ -65,7 +76,7 @@ public class truck : MonoBehaviour {
 	
 	private WheelFrictionCurve wfc;
 
-	private float  topSpeed = 160f;
+	//private float  topSpeed = 160f;
 	private float  topSpeedSecond = 160f;	//will change the km/h-m/s
 	public int numberOfGears = 5;
 	
@@ -271,16 +282,28 @@ public class truck : MonoBehaviour {
 		SetupWheelColliders();
 		
 		SetupCenterOfMass();
-		
-		topSpeed = topSpeedTotal;
-		changeToSecond (topSpeed);
+
+        //topSpeed = topSpeedTotal;
+        m_TruckTopSpeed = startTopSpeedTotal;
+        changeToSecond (m_TruckTopSpeed);
 		SetupGears();
 		resetResetInfor ();
 		
 		initialDragMultiplierX = dragMultiplier.x;
 
 		initYiXia (1.0f);
+        StartCoroutine(DelayChangeTruckTopSpeed());
 	}
+
+    /// <summary>
+    /// 延迟一定时间之后改变卡车的最高速度.
+    /// </summary>
+    IEnumerator DelayChangeTruckTopSpeed()
+    {
+        yield return new WaitForSeconds(8f);
+        m_TruckTopSpeed = topSpeedTotal;
+        changeToSecond(m_TruckTopSpeed);
+    }
 
 	public void onlyAddWheelCollider()
 	{Debug.Log (transform + " " + Network.isServer + " only addddd" );
@@ -848,8 +871,8 @@ public class truck : MonoBehaviour {
 		     && !rigidbody.isKinematic 
 		     && ((truckTrans.eulerAngles.x >= 335 && truckTrans.eulerAngles.x <= 360) || truckTrans.eulerAngles.x < 90))
 		{
-			if (nowSpeed < topSpeedTotal * speedAdjust)
-			rigidbody.velocity = Vector3.Lerp (rigidbody.velocity, (truckTrans.forward * (topSpeedTotal * speedAdjust)), changeTime * Time.deltaTime);
+			if (nowSpeed < m_TruckTopSpeed * speedAdjust)
+			rigidbody.velocity = Vector3.Lerp (rigidbody.velocity, (truckTrans.forward * (m_TruckTopSpeed * speedAdjust)), changeTime * Time.deltaTime);
 
 			if (!isActiveChentu && (!isGongluDuan || !isInGonglu))
 			{
