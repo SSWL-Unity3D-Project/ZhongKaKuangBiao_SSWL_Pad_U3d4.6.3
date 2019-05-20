@@ -794,12 +794,24 @@ namespace Server.FTPadServer
                 case "button":
                     {
                         //手柄按键消息.
+                        //DATA,374b1b26-ea3c-4669-aaca-7e42dc799c0e,button,0
                         /*if (pcvr.GetInstance().m_HongDDGamePadInterface != null)
                         {
                             //发射按键消息.
                             string fireBtDown = Assets.XKGame.Script.HongDDGamePad.HongDDGamePad.PlayerShouBingFireBt.fireBDown.ToString();
                             pcvr.GetInstance().m_HongDDGamePadInterface.OnReceiveActionOperationMsgFTServer(fireBtDown, userId);
                         }*/
+                        string btKey = "0";
+                        if (args.Length >= 4)
+                        {
+                            btKey = args[3];
+                        }
+                        ButtonState btState = btKey == "0" ? ButtonState.UP : ButtonState.DOWN;
+
+                        if (InputEventCtrl.GetInstance() != null)
+                        {
+                            InputEventCtrl.GetInstance().ClickShaCheBt(btState);
+                        }
                         break;
                     }
             }
@@ -811,6 +823,18 @@ namespace Server.FTPadServer
         void OnReceivedPlayerExit(string[] args)
         {
             //WEBSESSION_CLOSE,374b1b26-ea3c-4669-aaca-7e42dc799c0e,ClientClosing
+            if (args.Length < 3)
+            {
+                return;
+            }
+
+            string huiHuaId = args[1];
+            PlayerData playerDt = FindGamePlayerData(huiHuaId);
+            if (playerDt != null)
+            {
+                //删除玩家数据信息.
+                RemoveGamePlayerData(playerDt.userId);
+            }
         }
 
         /// <summary>

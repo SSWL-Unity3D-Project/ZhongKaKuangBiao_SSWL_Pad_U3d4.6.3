@@ -105,6 +105,12 @@ public class car : MonoBehaviour {
         //InputEventCtrl.GetInstance().ClickTVYaoKongRightBtEvent += ClickTVYaoKongRightBtEvent;
         InputEventCtrl.GetInstance().ClickTVYaoKongUpBtEvent += ClickTVYaoKongUpBtEvent;
         InputEventCtrl.GetInstance().ClickTVYaoKongDownBtEvent += ClickTVYaoKongDownBtEvent;
+        InputEventCtrl.GetInstance().ClickShaCheBtEvent += ClickShaCheBtEvent;
+    }
+
+    private void ClickShaCheBtEvent(ButtonState val)
+    {
+        HandleClickShaCheBtEvent(val);
     }
 
     float m_MaxTVYouMenVal = 0.5f;
@@ -665,8 +671,47 @@ public class car : MonoBehaviour {
 		
 		pcvr.playerBrake = handbrake;
 	}
-	
-	void CheckHandbrake()
+    
+    private void HandleClickShaCheBtEvent(ButtonState val)
+    {
+        switch (val)
+        {
+            case ButtonState.DOWN:
+                {
+                    //刹车被按下.
+                    if (!handbrake)
+                    {
+                        handbrake = true;
+                        handbrakeTime = Time.time;
+                        dragMultiplier.x = initialDragMultiplierX * handbrakeXDragFactor;
+
+                        if (shacheLightNum > 0)
+                        {
+                            openShacheLight();
+                        }
+                    }
+                    break;
+                }
+            case ButtonState.UP:
+                {
+                    //刹车弹起.
+                    if (handbrake)
+                    {
+                        handbrake = false;
+                        StartCoroutine(StopHandbraking(Mathf.Min(5, Time.time - handbrakeTime)));
+
+                        if (shacheLightNum > 0)
+                        {
+                            closeShacheLight();
+                        }
+                    }
+                    break;
+                }
+        }
+        InputBrake = handbrake == true ? 1f : 0f;
+    }
+
+    void CheckHandbrake()
 	{
 		if((pcvr.bIsHardWare && pcvr.IsActiveShaCheEvent) || (!pcvr.bIsHardWare && Input.GetKey("space")))
 		{

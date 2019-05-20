@@ -376,15 +376,15 @@ public class InputEventCtrl : MonoBehaviour {
 		//	ClickSetMoveBt( ButtonState.DOWN );
 		//}
 
-		/*if(Input.GetKeyUp(KeyCode.Space))
-		{
-			ClickShaCheBt( ButtonState.UP );
-		}
+		//if(Input.GetKeyUp(KeyCode.Space))
+		//{
+		//	ClickShaCheBt( ButtonState.UP );
+		//}
 		
-		if(Input.GetKeyDown(KeyCode.Space))
-		{
-			ClickShaCheBt( ButtonState.DOWN );
-		}*/
+		//if(Input.GetKeyDown(KeyCode.Space))
+		//{
+		//	ClickShaCheBt( ButtonState.DOWN );
+		//}
 
 		//if(Input.GetKeyUp(KeyCode.G))
 		//{
