@@ -300,7 +300,13 @@ public class truck : MonoBehaviour {
     /// </summary>
     IEnumerator DelayChangeTruckTopSpeed()
     {
-        yield return new WaitForSeconds(8f);
+        float time = 8f;
+        if (SSGameGlobalData.GetInstance() != null)
+        {
+            time = SSGameGlobalData.GetInstance().m_AiTruckData.qiBuTime;
+        }
+        yield return new WaitForSeconds(time);
+
         m_AiTruckTopSpeed = topSpeedTotal;
         changeToSecond(m_AiTruckTopSpeed);
     }
