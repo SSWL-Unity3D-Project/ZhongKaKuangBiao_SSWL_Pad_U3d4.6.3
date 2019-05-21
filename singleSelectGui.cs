@@ -36,9 +36,13 @@ public class singleSelectGui : MonoBehaviour {
             }
         }
 
-        if (Screen.width != 1280 || Screen.height != 720 || Screen.fullScreen != false)
+        //if (Screen.width != 1280 || Screen.height != 720 || Screen.fullScreen != false)
+        //{
+        //    Screen.SetResolution(1280, 720, false);
+        //}
+        if (Screen.width != 1360 || Screen.height != 768 || Screen.fullScreen != true)
         {
-            Screen.SetResolution(1280, 720, false);
+            Screen.SetResolution(1360, 768, true);
         }
         Debug.Log("dao link gui leeeeee");
 		pcvr.GetInstance().CloseFangXiangPanPower();
