@@ -755,8 +755,12 @@ namespace Server.FTPadServer
                         //DATA,374b1b26-ea3c-4669-aaca-7e42dc799c0e,move,-32,109
                         if (args.Length >= 5)
                         {
-                            float px = Assets.XKGame.Script.Comm.MathConverter.StringToFloat(args[3]);
-                            float py = Assets.XKGame.Script.Comm.MathConverter.StringToFloat(args[4]);
+                            //float px = Assets.XKGame.Script.Comm.MathConverter.StringToFloat(args[3]);
+                            //float py = Assets.XKGame.Script.Comm.MathConverter.StringToFloat(args[4]);
+                            int indexPx = args.Length - 2;
+                            int indexPy = args.Length - 1;
+                            float px = Assets.XKGame.Script.Comm.MathConverter.StringToFloat(args[indexPx]);
+                            float py = Assets.XKGame.Script.Comm.MathConverter.StringToFloat(args[indexPy]);
                             if (px == py && px == 0f)
                             {
                                 //玩家手指离开方向.
@@ -1039,8 +1043,12 @@ namespace Server.FTPadServer
                         string[] sagr = listPlayerDt[i].directionMsg.Split(',');
                         if (sagr.Length >= 5)
                         {
-                            string px = sagr[3].Length >= 6 ? sagr[3].Substring(0, 6) : sagr[3];
-                            string py = sagr[4].Length >= 6 ? sagr[4].Substring(0, 6) : sagr[4];
+                            //string px = sagr[3].Length >= 6 ? sagr[3].Substring(0, 6) : sagr[3];
+                            //string py = sagr[4].Length >= 6 ? sagr[4].Substring(0, 6) : sagr[4];
+                            int indexPx = sagr.Length - 2;
+                            int indexPy = sagr.Length - 1;
+                            string px = sagr[indexPx].Length >= 6 ? sagr[indexPx].Substring(0, 6) : sagr[indexPx];
+                            string py = sagr[indexPy].Length >= 6 ? sagr[indexPy].Substring(0, 6) : sagr[indexPy];
                             listPlayerDt[i].directionInfo = px + ", " + py;
                         }
                         listPlayerDt[i].directionMsg = "";
