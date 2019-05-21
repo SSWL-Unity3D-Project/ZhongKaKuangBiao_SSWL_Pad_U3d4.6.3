@@ -1014,27 +1014,36 @@ public class car : MonoBehaviour {
 
 		float throttleForce = 0;
 		float brakeForce = 0;
-
 		if (canDrive)
 		{
-			
-			/*if (throttle == 0)
-			{
-				throttleForce = 0;
-				brakeForce = 0;
-			}
-			else*/
-			if (HaveTheSameSign(relativeVelocity.z, throttle))
-			{
-				if (!handbrake)
-					throttleForce = Mathf.Sign(throttle) * currentEnginePower * rigidbody.mass;
-			}
-			else if(throttle == 0)
-				brakeForce = Mathf.Sign(throttle) * engineForceValues[0] * rigidbody.mass;
-			else
-				brakeForce =/* Mathf.Sign(throttle) **/ engineForceValues[0] * rigidbody.mass * (1f * throttle);
-			if (!rigidbody.isKinematic)
-				rigidbody.AddForce(transform.forward * Time.deltaTime * (throttleForce + brakeForce));
+            if (HaveTheSameSign(relativeVelocity.z, throttle))
+            {
+                if (!handbrake)
+                {
+                    throttleForce = Mathf.Sign(throttle) * currentEnginePower * rigidbody.mass;
+                }
+                else
+                {
+                    //玩家触发了刹车.
+                    float dTime = Time.time - handbrakeTime;
+                    float maxTime = 3f; //最多x秒后动力减少到0.
+                    float brakeVal = maxTime > dTime ? (maxTime - dTime) / maxTime : 0f;
+                    throttleForce = brakeVal * currentEnginePower * rigidbody.mass;
+                }
+            }
+            else if (throttle == 0)
+            {
+                brakeForce = Mathf.Sign(throttle) * engineForceValues[0] * rigidbody.mass;
+            }
+            else
+            {
+                brakeForce =/* Mathf.Sign(throttle) **/ engineForceValues[0] * rigidbody.mass * (1f * throttle);
+            }
+
+            if (!rigidbody.isKinematic)
+            {
+                rigidbody.AddForce(transform.forward * Time.deltaTime * (throttleForce + brakeForce));
+            }
 		}
 	}
 	
