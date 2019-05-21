@@ -807,10 +807,22 @@ namespace Server.FTPadServer
                             btKey = args[3];
                         }
                         ButtonState btState = btKey == "0" ? ButtonState.UP : ButtonState.DOWN;
-
-                        if (InputEventCtrl.GetInstance() != null)
+                        
+                        if (Application.loadedLevel == 0)
                         {
-                            InputEventCtrl.GetInstance().ClickShaCheBt(btState);
+                            //循环动画关卡.
+                            if (InputEventCtrl.GetInstance() != null)
+                            {
+                                InputEventCtrl.GetInstance().ClickStartBtOne(btState);
+                            }
+                        }
+                        else
+                        {
+                            //游戏关卡.
+                            if (InputEventCtrl.GetInstance() != null)
+                            {
+                                InputEventCtrl.GetInstance().ClickShaCheBt(btState);
+                            }
                         }
                         break;
                     }
